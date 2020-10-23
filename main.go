@@ -28,6 +28,12 @@ func main() {
 	purgeLogs, _ := strconv.ParseBool(os.Getenv("DRONE_PURGE_LOGS"))
 
 	c := newClient(host, token)
+
+	// FIXME: calculate page size by lastBuildNumber
+	var branch string
+	lb := getLastBuildNumber(c, namespace, repo, branch)
+	log.Infof("Last Build Number: %d\n", lb)
+
 	bs := getBuilds(c, namespace, repo, page, size)
 
 	if purgeLogs {
@@ -52,6 +58,14 @@ func newClient(host, token string) drone.Client {
 		},
 	)
 	return drone.NewClient(host, auther)
+}
+
+func getLastBuildNumber(c drone.Client, ns, repo, branch string) int64 {
+	lastBuild, err := c.BuildLast(ns, repo, branch)
+	if err != nil {
+		log.Fatalf("Oops... failed retrieving last build data\n")
+	}
+	return lastBuild.Number
 }
 
 func getBuilds(c drone.Client, ns, repo string, page, pageSize int) []*drone.Build {
