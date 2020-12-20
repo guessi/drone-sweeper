@@ -1,4 +1,4 @@
-module drone-cleaner
+module github.com/guessi/drone-sweeper
 
 go 1.15
 
